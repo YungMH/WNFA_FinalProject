@@ -1,0 +1,20 @@
+Keywords:
+Indoor localization; Mobile phones; Image processing ;  
+
+
+1.	INTRODUCTION: 
+
+The implement of accurate indoor positioning can apply to a wide range of location-based services across many sectors. For example, shopping malls and supermarkets are suitable for indoor positioning because it can provide improved navigation which helps customers to ?nd items they want, and it increases revenues from incremental sales from targeted advertising. Since WiFi and other RF-based approaches are a poor ?t for many applications like retail navigation in shopping mall, visible light-based approaches have shown some promise for indoor positioning. We propose an approach to accurate indoor positioning implemented by solid-state lighting, camera-enabled smartphones. 
+
+4.	REFERENCES: 
+
+
+ [1] Ye-Sheng Kuo, Pat Pannuto, Ko-Jen Hsiao, and Prabal Dutta.
+ Luxapose: Indoor Positioning with Mobile Phones and Visible Light
+ Electrical Engineering and Computer Science Department, University of      
+ Michigan
+ 
+[2] J. Armstrong, Y. A. Sekercioglu, and A. Neild. 
+Visible light positioning: A roadmap for international standardization.
+ IEEE Communications Magazine, 51(12), 2013.
+

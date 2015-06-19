@@ -1,10 +1,18 @@
 INSTUPtest1
 D:\研究所資料\wireless network\project5\github\src\processingImage\test1.py
-INFOS:&&3|1|2|0&&3|3|2|0&&3|4|2|0&&3|5|2|0&&3|6|2|0&&3|7|2|0
+INFOS:&&3|1|2|0&&3|3|2|0&&3|4|2|0&&3|5|2|0&&3|6|2|0&&3|7|2|0&&3|8|2|0&&3|9|2|0&&3|10|2|0&&3|11|2|0&&3|12|2|0&&3|13|2|0&&3|12|2|0&&3|13|2|0&&3|12|2|0&&3|14|2|0&&3|15|2|0
+radii=9
 img=1
 m2=3
 thresholded_img=5
+center=12
+cnt=11
+freqs=10
 threshold=4
-heirarchy=7
+contour_area=14
 test1=2
 contours=6
+centers=8
+heirarchy=7
+radius=13
+circle_area=15

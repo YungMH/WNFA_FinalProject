@@ -10,7 +10,7 @@ threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THR
 contours, heirarchy = cv2.findContours(thresholded_img, cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 #contours, heirarchy = cv2.findContours(thresholded_img, 1,2)
 
-#print contours 
+print contours 
 
 centers = []
 radii = []

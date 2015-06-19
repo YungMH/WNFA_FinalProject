@@ -30,7 +30,7 @@ for contour in contours:
     radii.append(radius)
 
 print centers
-print radii 
+print radius 
 
 cv2.imshow("img",thresholded_img)
 cv2.waitKey(0)

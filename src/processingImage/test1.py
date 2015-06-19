@@ -42,6 +42,7 @@ for contour in contours:
 print centers
 print radii
 
+cv2.imshow("blur",m2) #show (b)Blurred
 cv2.imshow("blank",blank_image)	#show (d)Contours
 cv2.imshow("contour",contour_image)	#show (e)result
 #cv2.imshow("contour_blur",contour_blur_image)	

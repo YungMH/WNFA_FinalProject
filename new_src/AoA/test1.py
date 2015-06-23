@@ -39,13 +39,52 @@ for contour in contours:
     centers.append(center)
     radii.append(radius)
 
-print centers
-print radii
+#print freqs[0], freqs[1], freqs[2]
 
 cv2.imshow("blank",blank_image)    #show (d)Contours
 cv2.imshow("contour",contour_image)    #show (e)result
 cv2.imshow("contour_blur",contour_blur_image)    
-
-
 cv2.waitKey(0)
+
+offset_z = 2.5 
+Zf = 2  #light z coordinate is fixed by Zf
+
+# add z coordinate to centers array 
+centerlist0 = list(centers[0]) 
+centerlist1 = list(centers[1]) 
+centerlist2 = list(centers[2]) 
+
+centerlist0.append(Zf)
+centerlist1.append(Zf)
+centerlist2.append(Zf)
+
+centers[0] = tuple(centerlist0)
+centers[1] = tuple(centerlist1)
+centers[2] = tuple(centerlist2)
+
+print "centers are :" , centers , "and radius are : " , radii 
+
+# Compute squared distance from lens center to each projection
+image_squared_distance = np.sum(np.square(centers), axis=1)
+print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
+
+# Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
+transmitters = [[2,5],[2.5,5.5],[3,5]]
+transmitter_pair_squared_distance = [0,0,0]
+pairwise_image_inner_products = [0,0,0]
+
+transmitter_pair_squared_distance[0] = np.square(transmitters[0][0] - transmitters[1][0]) + np.square(transmitters[0][1] - transmitters[1][1])
+transmitter_pair_squared_distance[1] = np.square(transmitters[1][0] - transmitters[2][0]) + np.square(transmitters[1][1] - transmitters[2][1])
+transmitter_pair_squared_distance[2] = np.square(transmitters[2][0] - transmitters[0][0]) + np.square(transmitters[2][1] - transmitters[0][1])
+print "squared distance (T0,T1) (T1,T2) (T2,T0) in real world :", transmitter_pair_squared_distance
+
+pairwise_image_inner_products[0]= np.dot(centers[0], centers[1])
+pairwise_image_inner_products[1]= np.dot(centers[1], centers[2])
+pairwise_image_inner_products[2]= np.dot(centers[2], centers[0])
+print  "inner products (R0.R1) (R1.R2) (R2.R0) :", pairwise_image_inner_products 
+
+''' compute K0,K1,K2 '''
+
+
+
 

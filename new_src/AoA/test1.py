@@ -10,8 +10,8 @@ from operator import itemgetter
 
 
 # Load an color image in grayscale
-img = cv2.imread('003.png',0)
-gray_image = cv2.imread('003.png', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('001.png',0)
+gray_image = cv2.imread('001.png', cv2.IMREAD_GRAYSCALE)
 
 m2 = cv2.blur(img, (50,50)) # faster and good enough
 threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -45,15 +45,13 @@ for contour in contours:
     centers.append(center)
     radii.append(radius)
 
-#print freqs[0], freqs[1], freqs[2]
-
 #cv2.imshow("blank",blank_image)    #show (d)Contours
 #cv2.imshow("contour",contour_image)    #show (e)result
 #cv2.imshow("contour_blur",contour_blur_image)    
 #cv2.waitKey(0)
 
 offset_z = 2.5 
-Zf = 2  #light z coordinate is fixed by Zf
+Zf = 0.72  #light z coordinate is fixed by Zf
 
 # add z coordinate to centers array 
 centerlist0 = list(centers[0]) 
@@ -68,7 +66,7 @@ centers[0] = tuple(centerlist0)
 centers[1] = tuple(centerlist1)
 centers[2] = tuple(centerlist2)
 
-print "centers are :" , centers , "and radius are : " , radii 
+print "old centers are :" , centers , " old radius are : " , radii 
 
 
 #SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRn
@@ -92,11 +90,14 @@ erosion = cv2.erode(gray_image, kernel, iterations = 2)
 
 imgs = {}
 cnts = {}
+mhhh = 15
 for i in xrange(0, 3):
     temp = erosion.copy()
-    imgs[i] = temp[centers[i][1] - radii[i]:centers[i][1] + radii[i], centers[i][0] - radii[i]:centers[i][0] + radii[i]]
+    #imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
+    imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
     cnts[i] = count_stripe(imgs[i])
-
+#cv2.imshow("imgs[0]",imgs[0])
+#cv2.waitKey(0)
 # assigning...
 srts = sorted(cnts.items(), key=itemgetter(1))
 ccenters, cradii = list(centers), list(radii)
@@ -105,35 +106,35 @@ for i in xrange(0, 3):
     centers[i] = ccenters[index]
     radii[i] = cradii[index]
 
-print "centers are :" , centers , "and radius are : " , radii 
+print "Correct centers are :" , centers , "and radius are : " , radii 
 #SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 
 #centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]   #image001
 #centers = [(1194, 363, 2) , (772, 528, 2) , (768, 877, 2)]  #image002
-centers = [(1142, 754, 2), (1015, 367, 2), (600, 331, 2)]   #image003 
+#centers = [(1142, 754, 2), (1015, 367, 2), (600, 331, 2)]   #image003 
 
 #radii = [35, 31, 34]   #image001
 #radii = [33, 33, 34]   #image002
-radii = [31, 32, 35]    #image003 
+#radii = [31, 32, 35]   #image003 
 
 # Compute squared distance from lens center to each projection
 image_squared_distance = np.sum(np.square(centers), axis=1)
 print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
 
 # Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
-transmitters = [[-30,-30,250],[0,0,250],[30,-30,250]]
+transmitters = [[-23,-23,50],[0,0,50],[23,-23,50]]
 transmitter_pair_squared_distance = [0,0,0]
 pairwise_image_inner_products = [0,0,0]
 
-transmitter_pair_squared_distance[0] = np.square(transmitters[0][0] - transmitters[1][0]) + np.square(transmitters[0][1] - transmitters[1][1])
-transmitter_pair_squared_distance[1] = np.square(transmitters[1][0] - transmitters[2][0]) + np.square(transmitters[1][1] - transmitters[2][1])
-transmitter_pair_squared_distance[2] = np.square(transmitters[2][0] - transmitters[0][0]) + np.square(transmitters[2][1] - transmitters[0][1])
-print "squared distance (T0,T1) (T1,T2) (T2,T0) in real world :", transmitter_pair_squared_distance
+transmitter_pair_squared_distance[0] = np.square(transmitters[1][0] - transmitters[2][0]) + np.square(transmitters[1][1] - transmitters[2][1])
+transmitter_pair_squared_distance[1] = np.square(transmitters[0][0] - transmitters[1][0]) + np.square(transmitters[0][1] - transmitters[1][1])
+transmitter_pair_squared_distance[2] = np.square(transmitters[0][0] - transmitters[2][0]) + np.square(transmitters[0][1] - transmitters[2][1])
+print "squared distance (T1,T2) (T0,T1) (T0,T2) in real world :", transmitter_pair_squared_distance
 
-pairwise_image_inner_products[0]= np.dot(centers[0], centers[1])
-pairwise_image_inner_products[1]= np.dot(centers[1], centers[2])
-pairwise_image_inner_products[2]= np.dot(centers[2], centers[0])
-print  "inner products (R0.R1) (R1.R2) (R2.R0) :", pairwise_image_inner_products 
+pairwise_image_inner_products[0]= np.dot(centers[1], centers[2])
+pairwise_image_inner_products[1]= np.dot(centers[0], centers[1])
+pairwise_image_inner_products[2]= np.dot(centers[0], centers[2])
+print  "inner products (R1.R2) (R0.R1) (R0.R2) :", pairwise_image_inner_products 
 
 
 
@@ -169,9 +170,9 @@ def sol_guess_subset(index, var_cnt, sol_guess):
         return sol_guess_sub
 
 def brute_force_k():
-        number_of_iteration = 1000
+        number_of_iteration = 5000
         #k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
-        k0_vals = np.linspace(2, -2, number_of_iteration)
+        k0_vals = np.linspace(1, -0.001, number_of_iteration)
         err_history = []
         idx_history = []
         k_vals = np.array([])
@@ -235,7 +236,7 @@ def scalar_scaling(k_vals):
     return np.sum(errs)
 
 '''
-actual_location = [0,0,0]
+actual_location = [13,-14,50]
 k_vals_actual = []
 
 for i in range(3):
@@ -251,17 +252,19 @@ for i in range(3):
 
 print "K_vals_actual :" , k_vals_actual
 '''
-#k_vals_init = brute_force_k() 
+
+k_vals_init = brute_force_k() 
 #k_vals_init = [-0.27531779 -0.14441908 -0.09497078]
 
-k_ranges = [slice(-0.01, 0.01, (0.01+0.01)/10) for i in xrange(3)]
-k_vals_init = scipy.optimize.brute(scalar_scaling, k_ranges, disp=True)
+#k_ranges = [slice(.001, .9, (.9-.001)/100) for i in xrange(3)]
+#k_vals_init = scipy.optimize.brute(scalar_scaling, k_ranges, disp=True)
 
-print k_vals_init
+#print k_vals_init
 
 #Start compute Tx Ty Tz 
 k_vals, ier = scipy.optimize.leastsq(least_squares_scaling_factors, k_vals_init)
-print " k_vals : " , k_vals 
+print "k_vals : " , k_vals
+
 
 def least_squares_rx_location(rx_location):
     dists = []
@@ -270,6 +273,8 @@ def least_squares_rx_location(rx_location):
             np.sum(np.square(rx_location - transmitters[i])) -\
             k_vals[i]**2 * image_squared_distance[i]
         )
+         
+    #print dists
     return dists
 
 def least_squares_rotation(rotation):
@@ -288,7 +293,7 @@ def initial_position_guess(transmitters):
     return guess
     
 #rx_location_init = initial_position_guess(transmitters)
-rx_location_init = [100,100,100]
+rx_location_init = [0,-20,0]
 print "rx init : " , rx_location_init 
 
 rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)

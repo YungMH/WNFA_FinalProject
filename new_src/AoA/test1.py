@@ -10,8 +10,8 @@ from operator import itemgetter
 
 
 # Load an color image in grayscale
-img = cv2.imread('001.png',0)
-gray_image = cv2.imread('001.png', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('002.png',0)
+gray_image = cv2.imread('002.png', cv2.IMREAD_GRAYSCALE)
 
 m2 = cv2.blur(img, (50,50)) # faster and good enough
 threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -122,7 +122,7 @@ image_squared_distance = np.sum(np.square(centers), axis=1)
 print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
 
 # Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
-transmitters = [[-23,-23,50],[0,0,50],[23,-23,50]]
+transmitters = [[-23,-23,250],[0,0,250],[23,-23,250]]
 transmitter_pair_squared_distance = [0,0,0]
 pairwise_image_inner_products = [0,0,0]
 
@@ -170,9 +170,9 @@ def sol_guess_subset(index, var_cnt, sol_guess):
         return sol_guess_sub
 
 def brute_force_k():
-        number_of_iteration = 5000
+        number_of_iteration = 10000
         #k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
-        k0_vals = np.linspace(1, -0.001, number_of_iteration)
+        k0_vals = np.linspace(1, -0.1, number_of_iteration)
         err_history = []
         idx_history = []
         k_vals = np.array([])
@@ -293,7 +293,7 @@ def initial_position_guess(transmitters):
     return guess
     
 #rx_location_init = initial_position_guess(transmitters)
-rx_location_init = [0,-20,0]
+rx_location_init = [0,0,-100]
 print "rx init : " , rx_location_init 
 
 rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)

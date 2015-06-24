@@ -90,11 +90,11 @@ erosion = cv2.erode(gray_image, kernel, iterations = 2)
 
 imgs = {}
 cnts = {}
-mhhh = 15
+mhhh = 13
 for i in xrange(0, 3):
     temp = erosion.copy()
-    #imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
-    imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
+    imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
+    #imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
     cnts[i] = count_stripe(imgs[i])
 #cv2.imshow("imgs[0]",imgs[0])
 #cv2.waitKey(0)

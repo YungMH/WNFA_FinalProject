@@ -9,8 +9,8 @@ import scipy.cluster
 
 
 # Load an color image in grayscale
-img = cv2.imread('001.png',0)
-gray_image = cv2.imread('001.png', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('002.png',0)
+gray_image = cv2.imread('002.png', cv2.IMREAD_GRAYSCALE)
 
 m2 = cv2.blur(img, (50,50)) # faster and good enough
 threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -76,15 +76,18 @@ indicate R0 R1 R2
 
 '''
 
-centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]
-radii = [35, 31, 34]
+#centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]
+centers = [(1194, 363, 2) , (772, 528, 2) , (768, 877, 2)  ]
+
+#radii = [35, 31, 34]
+radii = [33, 33, 34]
 
 # Compute squared distance from lens center to each projection
 image_squared_distance = np.sum(np.square(centers), axis=1)
 print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
 
 # Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
-transmitters = [[-100,-100,100],[0,0,100],[100,-100,100]]
+transmitters = [[-30,-30,250],[0,0,250],[30,-30,250]]
 transmitter_pair_squared_distance = [0,0,0]
 pairwise_image_inner_products = [0,0,0]
 
@@ -155,7 +158,7 @@ def brute_force_k():
                 sol = np.roots([image_squared_distance[i], -2*sol_guess[0,0]*pairwise_image_inner_products[i], (sol_guess[0,0]**2*image_squared_distance[0]-transmitter_pair_squared_distance[i])]);
                 #print "++++++++++++++++++++" , sol 
                 
-                if np.isreal(sol[0]):
+                if np.isreal(sol)[0]:
                     if (sol[0] < 0) and (sol[1] < 0):
                         sol_guess = np.append(sol_guess, [sol], axis=0)
                         multiple_sol += 1
@@ -188,11 +191,10 @@ def brute_force_k():
                     print ("First found index: ", j)
                 err_history.append(min(scaling_factors_error_combination))
                 idx_history.append(j)
-        print "K_vals :" , k_vals
+        #print "K_vals :" , k_vals
         return k_vals
         # End of brute force method
 
-brute_force_k() 
 
 '''
 actual_location = [0,0,0]
@@ -211,12 +213,42 @@ for i in range(3):
 
 print "K_vals_actual :" , k_vals_actual
 '''
-
+k_vals_init = brute_force_k() 
 #Start compute Tx Ty Tz 
-
 k_vals, ier = scipy.optimize.leastsq(least_squares_scaling_factors, k_vals_init)
+print " k_vals : " , k_vals 
+
+def least_squares_rx_location(rx_location):
+    dists = []
+    for i in xrange(3):
+        dists.append(
+            np.sum(np.square(rx_location - transmitters[i])) -\
+            k_vals[i]**2 * image_squared_distance[i]
+        )
+    return dists
+
+def least_squares_rotation(rotation):
+    rotation = rotation.reshape((3,3))
+    r = transmitters.T - rotation.dot(absolute_centers) - rx_location.reshape(3,1)
+    r = numpy.square(r)
+    r = r.flatten()
+    return r
 
 
+def initial_position_guess(transmitters):
+    '''Need to see huerisitic with a location; use the average of lights'''
+    guess = np.mean(transmitters, axis=0) 
+    offset = 250
+    guess[2] = guess[2] - offset
+    return guess
+
+rx_location_init = initial_position_guess(transmitters)
+rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)
+
+print rx_location , ier
+
+# Compute the scaled and transformed transmitter locations
+#absolute_centers = centers.T * np.vstack([k_vals, k_vals, k_vals])
 
 
 

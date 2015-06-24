@@ -41,10 +41,10 @@ for contour in contours:
 
 #print freqs[0], freqs[1], freqs[2]
 
-#cv2.imshow("blank",blank_image)    #show (d)Contours
-#cv2.imshow("contour",contour_image)    #show (e)result
-#cv2.imshow("contour_blur",contour_blur_image)    
-#cv2.waitKey(0)
+cv2.imshow("blank",blank_image)    #show (d)Contours
+cv2.imshow("contour",contour_image)    #show (e)result
+cv2.imshow("contour_blur",contour_blur_image)    
+cv2.waitKey(0)
 
 offset_z = 2.5 
 Zf = 2  #light z coordinate is fixed by Zf
@@ -94,7 +94,7 @@ print  "inner products (R0.R1) (R1.R2) (R2.R0) :", pairwise_image_inner_products
 
 ''' compute K0,K1,K2 '''
 
-
+'''
 def least_squares_scaling_factors(k_vals):
         errs = []          
         for i in range(0,2):
@@ -186,7 +186,7 @@ def brute_force_k():
 
 brute_force_k() 
 
-
+'''
 
 
 

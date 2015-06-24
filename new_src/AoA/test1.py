@@ -144,7 +144,7 @@ def brute_force_k():
             multiple_sol = 0
             for i in range(1, 3):
                 sol = np.roots([image_squared_distance[i], -2*sol_guess[0,0]*pairwise_image_inner_products[i], (sol_guess[0,0]**2*image_squared_distance[0]-transmitter_pair_squared_distance[i])]);
-                print "++++++++++++++++++++" , sol 
+                #print "++++++++++++++++++++" , sol 
                 
                 if np.isreal(sol[0]):
                     if (sol[0] < 0) and (sol[1] < 0):
@@ -161,7 +161,7 @@ def brute_force_k():
                     sol_found = 0
                     break
             if sol_found:
-                print " sol_founddddddd .................."
+                #print " sol_founddddddd .................."
                 
                 scaling_factors_error_combination = []
                 #print ("index:", j)
@@ -183,8 +183,9 @@ def brute_force_k():
         return k_vals
         # End of brute force method
 
-
 brute_force_k() 
+
+
 
 
 

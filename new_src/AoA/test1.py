@@ -41,10 +41,10 @@ for contour in contours:
 
 #print freqs[0], freqs[1], freqs[2]
 
-cv2.imshow("blank",blank_image)    #show (d)Contours
-cv2.imshow("contour",contour_image)    #show (e)result
-cv2.imshow("contour_blur",contour_blur_image)    
-cv2.waitKey(0)
+#cv2.imshow("blank",blank_image)    #show (d)Contours
+#cv2.imshow("contour",contour_image)    #show (e)result
+#cv2.imshow("contour_blur",contour_blur_image)    
+#cv2.waitKey(0)
 
 offset_z = 2.5 
 Zf = 2  #light z coordinate is fixed by Zf
@@ -63,6 +63,13 @@ centers[1] = tuple(centerlist1)
 centers[2] = tuple(centerlist2)
 
 print "centers are :" , centers , "and radius are : " , radii 
+
+
+'''
+
+indicate R0 R1 R2
+
+'''
 
 # Compute squared distance from lens center to each projection
 image_squared_distance = np.sum(np.square(centers), axis=1)
@@ -83,7 +90,105 @@ pairwise_image_inner_products[1]= np.dot(centers[1], centers[2])
 pairwise_image_inner_products[2]= np.dot(centers[2], centers[0])
 print  "inner products (R0.R1) (R1.R2) (R2.R0) :", pairwise_image_inner_products 
 
+
+
 ''' compute K0,K1,K2 '''
+
+
+def least_squares_scaling_factors(k_vals):
+        errs = []          
+        for i in range(0,2):
+            errs.append(
+                k_vals[i]**2 * image_squared_distance[i] +\
+                k_vals[i+1]**2 * image_squared_distance[i+1] -\
+                2*k_vals[i]*k_vals[i+1] * pairwise_image_inner_products[i] -\
+                transmitter_pair_squared_distance[i]
+            )
+            
+        errs.append(k_vals[2]**2 * image_squared_distance[2] +\
+            k_vals[0]**2 * image_squared_distance[0] -\
+            2*k_vals[2]*k_vals[0] * pairwise_image_inner_products[2] -\
+            transmitter_pair_squared_distance[2])
+        
+        return errs
+        
+
+def sol_guess_subset(index, var_cnt, sol_guess):
+        sol_guess_sub = np.array([sol_guess[0,0]])
+        for i in range(1,3):
+            if sol_guess[i, 1] < 0:
+                sol_guess_sub = np.append(sol_guess_sub, sol_guess[i, int((index%(2**var_cnt))/2**(var_cnt-1))])
+                var_cnt -= 1
+            else:
+                sol_guess_sub = np.append(sol_guess_sub, sol_guess[i, 0])
+        return sol_guess_sub
+
+def brute_force_k():
+        number_of_iteration = 500
+        k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
+        err_history = []
+        idx_history = []
+        k_vals = np.array([])
+        for j in range(number_of_iteration+1):
+            # Last iteration, Find minimum
+            if (j==number_of_iteration):               
+                min_error_history_idx = err_history.index(min(err_history))
+                min_idx = idx_history[min_error_history_idx]
+                print("Using index ", min_idx, "for initial guess")
+                k0_val = k0_vals[min_idx]
+                #print(k0_val)
+            else:
+                k0_val = k0_vals[j]
+            sol_guess = np.array([[k0_val, 0]])
+            sol_found = 1
+            multiple_sol = 0
+            for i in range(1, 3):
+                sol = np.roots([image_squared_distance[i], -2*sol_guess[0,0]*pairwise_image_inner_products[i], (sol_guess[0,0]**2*image_squared_distance[0]-transmitter_pair_squared_distance[i])]);
+                print "++++++++++++++++++++" , sol 
+                
+                if np.isreal(sol)[0]:
+                    if (sol[0] < 0) and (sol[1] < 0):
+                        sol_guess = np.append(sol_guess, [sol], axis=0)
+                        multiple_sol += 1
+                    elif sol[0] < 0:
+                        sol_guess = np.append(sol_guess, np.array([[sol[0], 0]]), axis=0)
+                    elif sol[1] < 0:
+                        sol_guess = np.append(sol_guess, np.array([[sol[1], 0]]), axis=0)
+                    else:
+                        sol_found = 0
+                        break
+                else:
+                    sol_found = 0
+                    break
+            if sol_found:
+                print " sol_founddddddd .................."
+                
+                scaling_factors_error_combination = []
+                #print ("index:", j)
+                for m in range(1, 2**multiple_sol+1):
+                    sol_guess_combination = sol_guess_subset(m, multiple_sol, sol_guess)
+                    scaling_factors_error_arr = least_squares_scaling_factors(sol_guess_combination)
+                    scaling_factors_error = 0
+                    for n in scaling_factors_error_arr:
+                        scaling_factors_error += n**2
+                    scaling_factors_error_combination.append(scaling_factors_error)
+                    #print("m: ", m, sol_guess_subset(m, multiple_sol, sol_guess), "error: ", scaling_factors_error)
+                k_vals = sol_guess_subset(np.argmin(scaling_factors_error_combination)+1, multiple_sol, sol_guess)
+                #print("mininum index", numpy.argmin(scaling_factors_error_combination), "K values: ", k_vals)
+                if len(err_history)==0:
+                    print ("First found index: ", j)
+                err_history.append(min(scaling_factors_error_combination))
+                idx_history.append(j)
+        print k_vals
+        return k_vals
+        # End of brute force method
+
+
+brute_force_k() 
+
+
+
+
 
 
 

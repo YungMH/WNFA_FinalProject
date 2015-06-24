@@ -76,7 +76,7 @@ image_squared_distance = np.sum(np.square(centers), axis=1)
 print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
 
 # Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
-transmitters = [[2,5],[2.5,5.5],[3,5]]
+transmitters = [[-100,-100],[0,0],[100,-100]]
 transmitter_pair_squared_distance = [0,0,0]
 pairwise_image_inner_products = [0,0,0]
 
@@ -94,7 +94,7 @@ print  "inner products (R0.R1) (R1.R2) (R2.R0) :", pairwise_image_inner_products
 
 ''' compute K0,K1,K2 '''
 
-'''
+
 def least_squares_scaling_factors(k_vals):
         errs = []          
         for i in range(0,2):
@@ -124,7 +124,7 @@ def sol_guess_subset(index, var_cnt, sol_guess):
         return sol_guess_sub
 
 def brute_force_k():
-        number_of_iteration = 500
+        number_of_iteration = 1000
         k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
         err_history = []
         idx_history = []
@@ -146,7 +146,7 @@ def brute_force_k():
                 sol = np.roots([image_squared_distance[i], -2*sol_guess[0,0]*pairwise_image_inner_products[i], (sol_guess[0,0]**2*image_squared_distance[0]-transmitter_pair_squared_distance[i])]);
                 print "++++++++++++++++++++" , sol 
                 
-                if np.isreal(sol)[0]:
+                if np.isreal(sol[0]):
                     if (sol[0] < 0) and (sol[1] < 0):
                         sol_guess = np.append(sol_guess, [sol], axis=0)
                         multiple_sol += 1
@@ -186,7 +186,7 @@ def brute_force_k():
 
 brute_force_k() 
 
-'''
+
 
 
 

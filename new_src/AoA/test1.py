@@ -6,6 +6,7 @@ import scipy.misc
 import scipy.ndimage
 import scipy.signal
 import scipy.cluster
+from operator import itemgetter
 
 
 # Load an color image in grayscale
@@ -70,11 +71,42 @@ centers[2] = tuple(centerlist2)
 print "centers are :" , centers , "and radius are : " , radii 
 
 
-'''
+#SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRn
+def count_stripe(imgg):
+    #print "counting stars..."
+    height, width = imgg.shape
+        diff = {}
+        diff[0] = 0
+        for k in xrange(1, height/2):
+            diff[k] = 0
+                for i in xrange(0, height/2):
+                    for j in xrange(0, width):
+                        p1, p2 = int(imgg[i + k, j]), int(imgg[i , j])
+                            diff[k] += abs(p1 - p2)
+                if diff[k] < diff[k-1]:
+                    return float(k)/height
 
-indicate R0 R1 R2
+#contrast enhancement
+kernel = np.ones((2,2),np.uint8)
+erosion = cv2.erode(gray_image, kernel, iterations = 2)
 
-'''
+imgs = {}
+cnts = {}
+for i in xrange(0, 3):
+    temp = erosion.copy()
+        imgs[i] = temp[centers[i][1] - radii[i]:centers[i][1] + radii[i], centers[i][0] - radii[i]:centers[i][0] + radii[i]]
+        cnts[i] = count_stripe(imgs[i])
+
+# assigning...
+srts = sorted(cnts.items(), key=itemgetter(1))
+ccenters, cradii = list(centers), list(radii)
+for i in xrange(0, 3):
+    index = srts[i][0]
+        centers[i] = ccenters[index]
+        radii[i] = cradii[index]
+
+print "centers are :" , centers , "and radius are : " , radii 
+#SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 
 #centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]   #image001
 #centers = [(1194, 363, 2) , (772, 528, 2) , (768, 877, 2)]  #image002

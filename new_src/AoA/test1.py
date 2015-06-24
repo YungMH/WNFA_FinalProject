@@ -1,6 +1,11 @@
 import math 
 import numpy as np
 import cv2
+import scipy as scipy
+import scipy.misc
+import scipy.ndimage
+import scipy.signal
+import scipy.cluster
 
 
 # Load an color image in grayscale
@@ -41,10 +46,10 @@ for contour in contours:
 
 #print freqs[0], freqs[1], freqs[2]
 
-cv2.imshow("blank",blank_image)    #show (d)Contours
-cv2.imshow("contour",contour_image)    #show (e)result
-cv2.imshow("contour_blur",contour_blur_image)    
-cv2.waitKey(0)
+#cv2.imshow("blank",blank_image)    #show (d)Contours
+#cv2.imshow("contour",contour_image)    #show (e)result
+#cv2.imshow("contour_blur",contour_blur_image)    
+#cv2.waitKey(0)
 
 offset_z = 2.5 
 Zf = 2  #light z coordinate is fixed by Zf
@@ -71,12 +76,15 @@ indicate R0 R1 R2
 
 '''
 
+centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]
+radii = [35, 31, 34]
+
 # Compute squared distance from lens center to each projection
 image_squared_distance = np.sum(np.square(centers), axis=1)
 print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
 
 # Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
-transmitters = [[-100,-100],[0,0],[100,-100]]
+transmitters = [[-100,-100,100],[0,0,100],[100,-100,100]]
 transmitter_pair_squared_distance = [0,0,0]
 pairwise_image_inner_products = [0,0,0]
 
@@ -125,7 +133,8 @@ def sol_guess_subset(index, var_cnt, sol_guess):
 
 def brute_force_k():
         number_of_iteration = 1000
-        k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
+        #k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
+        k0_vals = np.linspace(0.01, -0.01, number_of_iteration)
         err_history = []
         idx_history = []
         k_vals = np.array([])
@@ -179,16 +188,33 @@ def brute_force_k():
                     print ("First found index: ", j)
                 err_history.append(min(scaling_factors_error_combination))
                 idx_history.append(j)
-        print k_vals
+        print "K_vals :" , k_vals
         return k_vals
         # End of brute force method
 
 brute_force_k() 
 
+'''
+actual_location = [0,0,0]
+k_vals_actual = []
 
+for i in range(3):
+    # T is phone location in transmitter's frame of reference
+    # (Tx - x)^2 + (Ty - y)^2 + (Tz - z)^2 = K^2*(a^2 + b^2 + Zf^2)
+    t_sum = (actual_location[0] - transmitters[i][0])**2 +\
+            (actual_location[1] - transmitters[i][1])**2 +\
+            (actual_location[2] - transmitters[i][2])**2
+    
+    px_sum = image_squared_distance[i] 
+    k_sqared = t_sum / float(px_sum)  
+    k_vals_actual.append(k_sqared**.5)
 
+print "K_vals_actual :" , k_vals_actual
+'''
 
+#Start compute Tx Ty Tz 
 
+k_vals, ier = scipy.optimize.leastsq(least_squares_scaling_factors, k_vals_init)
 
 
 

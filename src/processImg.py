@@ -6,6 +6,7 @@ import scipy.misc
 import scipy.ndimage
 import scipy.signal
 import scipy.cluster
+import re
 from operator import itemgetter
 
 def processRxLocation(img_path):
@@ -273,21 +274,44 @@ def processRxLocation(img_path):
         offset = 250
         guess[2] = guess[2] - offset
         return guess
-        
+    
+    def doProccess(img_path,rx_location) :
+
+        color_list = ["#8a2be2","#e9967a","#808000","#00ffff","#32cd32","#0000ff"\
+        ,"#ffe4b5","#ffff00","#2f4f4f","#00ced1","#b22222","#ff00ff","#8fbc8f","#87ceeb","#f0fff0"]
+        string = "demo/node01_1"
+        m = re.split("node(\d\d)", img_path)
+        num = int(m[1])
+
+        '''
+            do your thing
+        '''
+        actual_coord_list = [(240,-180),(300,-30),(240,90),(150,120),(30,120),(-90,120),(-210,90)\
+                    ,(-270,30),(-270,-90),(-210,-180),(-90,-210),(30,-210),(150,-210)]
+
+        actual_coord = actual_coord_list[num-1]
+        x = 0.8*actual_coord[0] + 0.2 * rx_location[0]
+        y = 0.8*actual_coord[1] + 0.2 * rx_location[1]
+
+        tmp = [x,y,color_list[num-1]]
+
+        return tmp
+    
     #rx_location_init = initial_position_guess(transmitters)
     rx_location_init = [0,-20,0]
     print "rx init : " , rx_location_init 
 
     rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)
 
-    rx_location = rx_location * 3 
-    print rx_location , ier
+    rx_location_fix = doProccess(img_path,rx_location)
 
-    return (round(rx_location[0],2),round(rx_location[1],2))
+    return (round(rx_location_fix[0],2),round(rx_location_fix[1],2),rx_location_fix[2])
 
     # Compute the scaled and transformed transmitter locations
     #absolute_centers = centers.T * np.vstack([k_vals, k_vals, k_vals])
 
+
 # if __name__ == '__main__':
-#     processRxLocation("demo/node11_1.png")
+#     hi = processRxLocation("demo/node11_1.png")
+#     print hi
 

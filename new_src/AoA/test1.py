@@ -9,9 +9,10 @@ import scipy.cluster
 from operator import itemgetter
 
 
-# Load an color image in grayscale
-img = cv2.imread('godd1.png',0)
-gray_image = cv2.imread('godd1.png', cv2.IMREAD_GRAYSCALE)
+# Load an color image in grayscal
+img_path = 'demo10/fc2_save_2015-06-25-233907-0007.png'
+img = cv2.imread(img_path,0)
+gray_image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
 m2 = cv2.blur(img, (50,50)) # faster and good enough
 threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -51,7 +52,7 @@ for contour in contours:
 #cv2.waitKey(0)
 
 offset_z = 2.5 
-Zf = 0.72  #light z coordinate is fixed by Zf
+Zf = 0.2  #light z coordinate is fixed by Zf
 
 # add z coordinate to centers array 
 centerlist0 = list(centers[0]) 
@@ -93,8 +94,8 @@ cnts = {}
 mhhh = 13
 for i in xrange(0, 3):
     temp = erosion.copy()
-    #imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
-    imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
+    imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
+    #imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
     cnts[i] = count_stripe(imgs[i])
 #cv2.imshow("imgs[0]",imgs[0])
 #cv2.waitKey(0)
@@ -110,19 +111,10 @@ print "Correct centers are :" , centers , "and radius are : " , radii
 #SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 
 #centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]   #image001
-#centers = [(1194, 363, 2) , (772, 528, 2) , (768, 877, 2)]  #image002
-#centers = [(1142, 754, 2), (1015, 367, 2), (600, 331, 2)]   #image003 
-#centers = [(1154, 689, 0.72), (1200, 484, 0.72), (903, 385, 0.72)]   #team3 
-#centers = [(1463, 685, 0.72), (599, 351, 0.72), (327, 690, 0.72)] 
-#center = [(1945, 595, 0.72), (1018, 300, 0.72) , (88, 624, 0.72)]
-
+#centers = [(596, 338, 0.2), (794, 675, 0.2), (1242, 691, 0.2)]   #image001
 
 #radii = [35, 31, 34]   #image001
-#radii = [33, 33, 34]   #image002
-#radii = [31, 32, 35]   #image003 
-#radii = [30 , 29 , 36 ] #team3
-#radii = [28 , 34 , 34 ] #team5
-radii = [35 , 40 , 43 ] #team5
+#radii = [31 , 31 , 36 ] #team5
 
 # Compute squared distance from lens center to each projection
 image_squared_distance = np.sum(np.square(centers), axis=1)
@@ -149,20 +141,26 @@ print  "inner products (R1.R2) (R0.R1) (R0.R2) :", pairwise_image_inner_products
 
 
 def least_squares_scaling_factors(k_vals):
-        errs = []          
-        for i in range(0,2):
-            errs.append(
-                k_vals[i]**2 * image_squared_distance[i] +\
-                k_vals[i+1]**2 * image_squared_distance[i+1] -\
-                2*k_vals[i]*k_vals[i+1] * pairwise_image_inner_products[i] -\
-                transmitter_pair_squared_distance[i]
-            )
+        errs = []
+        errs.append(
+            k_vals[0]**2 * image_squared_distance[0] +\
+            k_vals[1]**2 * image_squared_distance[1] -\
+            2*k_vals[0]*k_vals[1] * pairwise_image_inner_products[1] -\
+            transmitter_pair_squared_distance[1]
+        )
             
-        errs.append(k_vals[2]**2 * image_squared_distance[2] +\
+        errs.append(
+            k_vals[1]**2 * image_squared_distance[1] +\
+            k_vals[2]**2 * image_squared_distance[2] -\
+            2*k_vals[1]*k_vals[2] * pairwise_image_inner_products[0] -\
+            transmitter_pair_squared_distance[0])
+        
+        errs.append(
+            k_vals[2]**2 * image_squared_distance[2] +\
             k_vals[0]**2 * image_squared_distance[0] -\
             2*k_vals[2]*k_vals[0] * pairwise_image_inner_products[2] -\
             transmitter_pair_squared_distance[2])
-        
+
         return errs
         
 
@@ -177,9 +175,9 @@ def sol_guess_subset(index, var_cnt, sol_guess):
         return sol_guess_sub
 
 def brute_force_k():
-        number_of_iteration = 10000
+        number_of_iteration = 5000
         #k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
-        k0_vals = np.linspace(1, -0.1, number_of_iteration)
+        k0_vals = np.linspace(0.1, -0.01, number_of_iteration)
         err_history = []
         idx_history = []
         k_vals = np.array([])
@@ -263,7 +261,7 @@ print "K_vals_actual :" , k_vals_actual
 k_vals_init = brute_force_k() 
 #k_vals_init = [-0.27531779 -0.14441908 -0.09497078]
 
-#k_ranges = [slice(.001, .9, (.9-.001)/100) for i in xrange(3)]
+#k_ranges = [slice(-0.01, 0.01, (0.01+0.01)/100) for i in xrange(3)]
 #k_vals_init = scipy.optimize.brute(scalar_scaling, k_ranges, disp=True)
 
 #print k_vals_init
@@ -300,11 +298,12 @@ def initial_position_guess(transmitters):
     return guess
     
 #rx_location_init = initial_position_guess(transmitters)
-rx_location_init = [0,0,-100]
+rx_location_init = [0,-20,0]
 print "rx init : " , rx_location_init 
 
 rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)
 
+rx_location = rx_location * 3 
 print rx_location , ier
 
 # Compute the scaled and transformed transmitter locations

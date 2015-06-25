@@ -10,8 +10,8 @@ from operator import itemgetter
 
 
 # Load an color image in grayscale
-img = cv2.imread('002.png',0)
-gray_image = cv2.imread('002.png', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('godd1.png',0)
+gray_image = cv2.imread('godd1.png', cv2.IMREAD_GRAYSCALE)
 
 m2 = cv2.blur(img, (50,50)) # faster and good enough
 threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -93,8 +93,8 @@ cnts = {}
 mhhh = 13
 for i in xrange(0, 3):
     temp = erosion.copy()
-    imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
-    #imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
+    #imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
+    imgs[i] = temp[centers[i][1] - radii[i] :centers[i][1] + radii[i] , centers[i][0] - radii[i] : centers[i][0] + radii[i] ]
     cnts[i] = count_stripe(imgs[i])
 #cv2.imshow("imgs[0]",imgs[0])
 #cv2.waitKey(0)
@@ -112,10 +112,17 @@ print "Correct centers are :" , centers , "and radius are : " , radii
 #centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]   #image001
 #centers = [(1194, 363, 2) , (772, 528, 2) , (768, 877, 2)]  #image002
 #centers = [(1142, 754, 2), (1015, 367, 2), (600, 331, 2)]   #image003 
+#centers = [(1154, 689, 0.72), (1200, 484, 0.72), (903, 385, 0.72)]   #team3 
+#centers = [(1463, 685, 0.72), (599, 351, 0.72), (327, 690, 0.72)] 
+#center = [(1945, 595, 0.72), (1018, 300, 0.72) , (88, 624, 0.72)]
+
 
 #radii = [35, 31, 34]   #image001
 #radii = [33, 33, 34]   #image002
 #radii = [31, 32, 35]   #image003 
+#radii = [30 , 29 , 36 ] #team3
+#radii = [28 , 34 , 34 ] #team5
+radii = [35 , 40 , 43 ] #team5
 
 # Compute squared distance from lens center to each projection
 image_squared_distance = np.sum(np.square(centers), axis=1)

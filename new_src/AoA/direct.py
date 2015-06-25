@@ -7,4 +7,4 @@ def getFileInDirectory(path):
     file_list = []
     for filename in glob.glob(os.path.join(path, '*.png')):
         file_list.append(filename)
-    return file_list
+    return sorted(file_list)

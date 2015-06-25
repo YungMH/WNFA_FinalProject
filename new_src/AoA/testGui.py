@@ -1,5 +1,6 @@
 from Tkinter import *
 import random
+import direct
 
 class WNFA_GUI(Frame):
     
@@ -93,6 +94,12 @@ class WNFA_GUI(Frame):
             del coord[0]
 
 if __name__ == '__main__':
+    
+    path = "/Volumes/Transcend/GitHub/WNFA_FinalProject/new_src/AoA"
+    img_list = direct.getFileInDirectory(path);
+
+    print img_list
+
     root = Tk()
     coord = [(2,29),(43,59),(-30,-40),(-60,70),(150,-169)]
 

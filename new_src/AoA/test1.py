@@ -9,9 +9,10 @@ import scipy.cluster
 from operator import itemgetter
 
 
-# Load an color image in grayscale
-img = cv2.imread('007.png',0)
-gray_image = cv2.imread('007.png', cv2.IMREAD_GRAYSCALE)
+# Load an color image in grayscal
+img_path = 'demo10/fc2_save_2015-06-25-233907-0007.png'
+img = cv2.imread(img_path,0)
+gray_image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
 m2 = cv2.blur(img, (50,50)) # faster and good enough
 threshold, thresholded_img = cv2.threshold(m2, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -90,7 +91,7 @@ erosion = cv2.erode(gray_image, kernel, iterations = 2)
 
 imgs = {}
 cnts = {}
-mhhh = 18
+mhhh = 13
 for i in xrange(0, 3):
     temp = erosion.copy()
     imgs[i] = temp[centers[i][1] - radii[i] + mhhh:centers[i][1] + radii[i] - mhhh, centers[i][0] - radii[i] + mhhh:centers[i][0] + radii[i] - mhhh]
@@ -302,6 +303,7 @@ print "rx init : " , rx_location_init
 
 rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)
 
+rx_location = rx_location * 3 
 print rx_location , ier
 
 # Compute the scaled and transformed transmitter locations

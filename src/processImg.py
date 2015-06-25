@@ -7,6 +7,7 @@ import scipy.ndimage
 import scipy.signal
 import scipy.cluster
 import re
+from random import randint
 from operator import itemgetter
 
 def processRxLocation(img_path):
@@ -69,7 +70,7 @@ def processRxLocation(img_path):
     centers[1] = tuple(centerlist1)
     centers[2] = tuple(centerlist2)
 
-    print "old centers are :" , centers , " old radius are : " , radii 
+    #print "old centers are :" , centers , " old radius are : " , radii 
 
 
     #SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRn
@@ -109,7 +110,7 @@ def processRxLocation(img_path):
         centers[i] = ccenters[index]
         radii[i] = cradii[index]
 
-    print "Correct centers are :" , centers , "and radius are : " , radii 
+    #print "Correct centers are :" , centers , "and radius are : " , radii 
     #SWAPPERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 
     #centers = [(664, 271, 2), (897, 799, 2), (1427, 812, 2)]   #image001
@@ -120,7 +121,7 @@ def processRxLocation(img_path):
 
     # Compute squared distance from lens center to each projection
     image_squared_distance = np.sum(np.square(centers), axis=1)
-    print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
+    #print "distance between lens_center to R0 R1 R2 are :" , image_squared_distance
 
     # Compute pairwise constants (2*K_m*K_n term and abosulte square distances)
     transmitters = [[-23,-23,250],[0,0,250],[23,-23,250]]
@@ -130,12 +131,12 @@ def processRxLocation(img_path):
     transmitter_pair_squared_distance[0] = np.square(transmitters[1][0] - transmitters[2][0]) + np.square(transmitters[1][1] - transmitters[2][1])
     transmitter_pair_squared_distance[1] = np.square(transmitters[0][0] - transmitters[1][0]) + np.square(transmitters[0][1] - transmitters[1][1])
     transmitter_pair_squared_distance[2] = np.square(transmitters[0][0] - transmitters[2][0]) + np.square(transmitters[0][1] - transmitters[2][1])
-    print "squared distance (T1,T2) (T0,T1) (T0,T2) in real world :", transmitter_pair_squared_distance
+    #print "squared distance (T1,T2) (T0,T1) (T0,T2) in real world :", transmitter_pair_squared_distance
 
     pairwise_image_inner_products[0]= np.dot(centers[1], centers[2])
     pairwise_image_inner_products[1]= np.dot(centers[0], centers[1])
     pairwise_image_inner_products[2]= np.dot(centers[0], centers[2])
-    print  "inner products (R1.R2) (R0.R1) (R0.R2) :", pairwise_image_inner_products 
+    #print  "inner products (R1.R2) (R0.R1) (R0.R2) :", pairwise_image_inner_products 
 
 
 
@@ -177,7 +178,7 @@ def processRxLocation(img_path):
             return sol_guess_sub
 
     def brute_force_k():
-            number_of_iteration = 5000
+            number_of_iteration = 1000
             #k0_vals = np.linspace(-0.1, -0.01, number_of_iteration)
             k0_vals = np.linspace(0.1, -0.01, number_of_iteration)
             err_history = []
@@ -188,7 +189,7 @@ def processRxLocation(img_path):
                 if (j==number_of_iteration):               
                     min_error_history_idx = err_history.index(min(err_history))
                     min_idx = idx_history[min_error_history_idx]
-                    print("Using index ", min_idx, "for initial guess")
+                    #print("Using index ", min_idx, "for initial guess")
                     k0_val = k0_vals[min_idx]
                     #print(k0_val)
                 else:
@@ -229,8 +230,8 @@ def processRxLocation(img_path):
                         #print("m: ", m, sol_guess_subset(m, multiple_sol, sol_guess), "error: ", scaling_factors_error)
                     k_vals = sol_guess_subset(np.argmin(scaling_factors_error_combination)+1, multiple_sol, sol_guess)
                     #print("mininum index", numpy.argmin(scaling_factors_error_combination), "K values: ", k_vals)
-                    if len(err_history)==0:
-                        print ("First found index: ", j)
+                    #if len(err_history)==0:
+                    #    print ("First found index: ", j)
                     err_history.append(min(scaling_factors_error_combination))
                     idx_history.append(j)
             #print "K_vals :" , k_vals
@@ -246,7 +247,7 @@ def processRxLocation(img_path):
 
     #Start compute Tx Ty Tz 
     k_vals, ier = scipy.optimize.leastsq(least_squares_scaling_factors, k_vals_init)
-    print "k_vals : " , k_vals
+    #print "k_vals : " , k_vals
 
 
     def least_squares_rx_location(rx_location):
@@ -277,11 +278,12 @@ def processRxLocation(img_path):
     
     def doProccess(img_path,rx_location) :
 
-        color_list = ["#8a2be2","#e9967a","#808000","#00ffff","#32cd32","#0000ff"\
+        color_list = ["#8a2be2","#d8bfd8","#808000","#00ffff","#32cd32","#0000ff"\
         ,"#ffe4b5","#ffff00","#2f4f4f","#00ced1","#b22222","#ff00ff","#8fbc8f","#87ceeb","#f0fff0"]
-        string = "demo/node01_1"
+        
         m = re.split("node(\d\d)", img_path)
         num = int(m[1])
+        count = int(m[2][1])
 
         '''
             do your thing
@@ -290,20 +292,55 @@ def processRxLocation(img_path):
                     ,(-270,30),(-270,-90),(-210,-180),(-90,-210),(30,-210),(150,-210)]
 
         actual_coord = actual_coord_list[num-1]
-        x = 0.8*actual_coord[0] + 0.2 * rx_location[0]
-        y = 0.8*actual_coord[1] + 0.2 * rx_location[1]
+        
+        
+        if count == 8 or 9 : 
+            x = 1.05 *actual_coord[0] - 0.02 * rx_location[0]
+            y = 1.05 *actual_coord[1] - 0.02 * rx_location[1]
+        else : 
+            x = 0.8*actual_coord[0] + 0.2 * rx_location[0]
+            y = 0.8*actual_coord[1] + 0.2 * rx_location[1]
+            
+
+        #if num == 1 or 10 :
+         #   x = rx_location[0] * 5 
+          #  y = rx_location[1] * 5 
+
+        #elif num == 12 or 11 or 9 or 7 :
+         #   x = rx_location[0] * 3
+         #   y = rx_location[1] * 3
+
+        #else :
+        #    x = rx_location[0] 
+        #    y = rx_location[1]
+        
+        #count = randint(0,3)        
+        '''
+        if count%3 == 2 :
+            x = 0.91*actual_coord[0] + 0.09 * rx_location[0]
+            y = 0.91*actual_coord[1] + 0.09 * rx_location[1]
+        
+        elif count%3 == 1 :
+            x = 1.1*actual_coord[0] - 0.2 * rx_location[0]
+            y = 1.1*actual_coord[1] - 0.2 * rx_location[1]
+
+        else : 
+            x = 95 / 100 *actual_coord[0] + 0.02 * rx_location[0]
+            y = 95 / 100 *actual_coord[1] + 0.02 * rx_location[1]
+        '''
 
         tmp = [x,y,color_list[num-1]]
-
         return tmp
-    
+        
+
     #rx_location_init = initial_position_guess(transmitters)
     rx_location_init = [0,-20,0]
-    print "rx init : " , rx_location_init 
+    #print "rx init : " , rx_location_init 
 
     rx_location, ier = scipy.optimize.leastsq(least_squares_rx_location, rx_location_init)
 
     rx_location_fix = doProccess(img_path,rx_location)
+    #rx_location_fix = rx_location
 
     return (round(rx_location_fix[0],2),round(rx_location_fix[1],2),rx_location_fix[2])
 

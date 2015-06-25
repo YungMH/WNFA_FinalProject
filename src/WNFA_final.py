@@ -106,7 +106,7 @@ class WNFA_GUI(Frame):
 
 if __name__ == '__main__':
     
-    path = "/Volumes/Transcend/GitHub/WNFA_FinalProject/new_src/AoA/demo"
+    path = "/Volumes/Transcend/GitHub/WNFA_FinalProject/src/demo2"
     img_list = direct.getFileInDirectory(path);
     
     coord = []
